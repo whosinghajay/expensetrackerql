@@ -55,6 +55,21 @@ const userResolver = {
         throw new Error(error.message || "Internal Server Error");
       }
     },
+
+    logout: async (_, __, {}) => {
+      try {
+        await context.logout();
+        req.session.destroy((err) => {
+          if (err) throw err;
+        });
+        res.clearCookie("connect.sid");
+        
+        return { message: "Logged out successfully" };
+      } catch (error) {
+        console.log("Error in logout", error);
+        throw new Error(error.message || "Internal Server Error");
+      }
+    },
   },
   Query: {
     users: (_, __, { req, res }) => {
