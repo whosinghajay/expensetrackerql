@@ -54,8 +54,19 @@ const transactionResolver = {
         throw new Error(error.message || "Error updating transaction");
       }
     },
-    deleteTransaction: async () => {},
+    deleteTransaction: async (_, { transactionId }) => {
+      try {
+        const deletedTransaction = await Transaction.findByIdAndDelete(
+          transactionId
+        );
+        return deletedTransaction;
+      } catch (error) {
+        console.log("Error deleting transaction", error);
+        throw new Error(error.message || "Error deleting transaction");
+      }
+    },
   },
+  //TODO => ADD TRANSACTION/USER RELATIONSHIP
 };
 
 export default transactionResolver;
