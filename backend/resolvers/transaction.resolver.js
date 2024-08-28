@@ -41,7 +41,19 @@ const transactionResolver = {
         throw new Error(error.message || "Error creating transaction");
       }
     },
-    updateTransaction: async () => {},
+    updateTransaction: async (_, { input }) => {
+      try {
+        const updatedTransaction = await Transaction.findByIdAndUpdate(
+          input.transactionId,
+          input,
+          { new: true } //By default, findOneAndUpdate() returns the document as it was before update was applied. If you set new: true, findOneAndUpdate() will instead give you the object after update was applied.
+        );
+        return updatedTransaction;
+      } catch (error) {
+        console.log("Error updating transaction");
+        throw new Error(error.message || "Error updating transaction");
+      }
+    },
     deleteTransaction: async () => {},
   },
 };
