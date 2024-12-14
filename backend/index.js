@@ -1,14 +1,59 @@
+import express from "express";
+import http from "http";
+import cors from "cors";
+import dotenv from "dotenv";
+
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
+//-----------------------------------------------------------
+// import { startStandaloneServer } from "@apollo/server/standalone";
+//-----------------------------------------------------------
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 
 import mergedResolvers from "./src/resolvers/index.js";
 import mergedTypeDefs from "./src/typeDefs/index.js";
+import { connectDB } from "./src/db/connectDB.js";
+
+dotenv.config();
+
+// Required logic for integrating with Express
+const app = express();
+// Our httpServer handles incoming requests to our Express app.
+// Below, we tell Apollo Server to "drain" this httpServer,
+// enabling our servers to shut down gracefully.
+const httpServer = http.createServer(app);
 
 const server = new ApolloServer({
   typeDefs: mergedTypeDefs,
   resolvers: mergedResolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
+// Ensure we wait for our server to start
+await server.start();
 
-const { url } = await startStandaloneServer(server);
+// Set up our Express middleware to handle CORS, body parsing,
+// and our expressMiddleware function.
+app.use(
+  "/",
+  cors(),
+  express.json(),
+  // expressMiddleware accepts the same arguments:
+  // an Apollo Server instance and optional configuration options
+  expressMiddleware(server, {
+    // context: async ({ req }) => ({ token: req.headers.token }),
+    context: async ({ req }) => ({ req }),
+  })
+);
 
-console.log(`Server is ready at ${url}`);
+// Modified server startup
+await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+await connectDB();
+console.log(`🚀 Server ready at http://localhost:4000/`);
+
+//-----------------------------------------------------------
+
+// const { url } = await startStandaloneServer(server);
+
+// console.log(`Server is ready at ${url}`);
+
+//-----------------------------------------------------------
