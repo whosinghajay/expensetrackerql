@@ -35,11 +35,11 @@ const httpServer = http.createServer(app);
 const MongoDBStore = connectMongo(session);
 
 const store = new MongoDBStore({
-  uri: process.env.MONGO_URI,
+  uri: `${process.env.MONGO_URI}expenseTrackerGraphQL`,
   collection: "sessions",
 });
 
-store.on("error", (err) => console.log(err));
+store.on("error", (err) => console.log("MongoDB session store error: ", err));
 
 app.use(
   session({
