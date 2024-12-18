@@ -1,5 +1,6 @@
+import Transaction from "../models/transaction.model.js";
 import User from "../models/user.model.js";
-import { users } from "../utils/dummyData.js";
+// import { users } from "../utils/dummyData.js";
 import bcrypt from "bcryptjs";
 
 const userResolver = {
@@ -67,6 +68,7 @@ const userResolver = {
       }
     },
   },
+
   Query: {
     // users: (_, __, { req, res }) => {
     //   return users;
@@ -88,6 +90,18 @@ const userResolver = {
       } catch (error) {
         console.log("Error in getting user: ", error);
         throw new Error(error.message || "Error in getting user");
+      }
+    },
+  },
+
+  User: {
+    transactions: async (parent) => {
+      try {
+        const transactions = Transaction.find({ userId: parent._id });
+        return transactions;
+      } catch (error) {
+        console.log("Error in user transaction resolver: ", error);
+        throw new Error(error.message || "Internal server error");
       }
     },
   },
